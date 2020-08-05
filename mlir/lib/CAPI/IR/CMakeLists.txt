@@ -1,20 +1,14 @@
-# Main API shared library.
-add_mlir_upstream_c_api_library(MLIRCAPIIR
-  AffineExpr.cpp
-  AffineMap.cpp
-  BuiltinAttributes.cpp
-  BuiltinTypes.cpp
-  Diagnostics.cpp
-  DialectHandle.cpp
-  IntegerSet.cpp
+# Main API.
+add_mlir_library(MLIRCAPIIR
   IR.cpp
-  Pass.cpp
-  Support.cpp
+
+  EXCLUDE_FROM_LIBMLIR
+
+  ADDITIONAL_HEADER_DIRS
+  ${MLIR_MAIN_INCLUDE_DIR}/mlir-c
 
   LINK_LIBS PUBLIC
-  MLIRBytecodeWriter
   MLIRIR
   MLIRParser
   MLIRSupport
-  MLIRPass
-)
+  )
