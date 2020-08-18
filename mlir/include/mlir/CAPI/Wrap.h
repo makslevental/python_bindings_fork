@@ -18,9 +18,9 @@
 #include "mlir-c/IR.h"
 #include "mlir/Support/LLVM.h"
 
-//===----------------------------------------------------------------------===//
-// Definitions of methods for non-owning structures used in C API.
-//===----------------------------------------------------------------------===//
+/* ========================================================================== */
+/* Definitions of methods for non-owning structures used in C API.            */
+/* ========================================================================== */
 
 #define DEFINE_C_API_PTR_METHODS(name, cpptype)                                \
   static inline name wrap(cpptype *cpp) { return name{cpp}; }                  \
@@ -44,7 +44,7 @@ static llvm::ArrayRef<CppTy> unwrapList(size_t size, CTy *first,
       "incompatible C and C++ types");
 
   if (size == 0)
-    return {};
+    return llvm::None;
 
   assert(storage.empty() && "expected to populate storage");
   storage.reserve(size);
