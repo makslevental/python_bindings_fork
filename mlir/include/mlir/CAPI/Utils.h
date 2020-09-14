@@ -14,14 +14,11 @@
 #ifndef MLIR_CAPI_UTILS_H
 #define MLIR_CAPI_UTILS_H
 
-#include <utility>
-
-#include "mlir-c/Support.h"
 #include "llvm/Support/raw_ostream.h"
 
-//===----------------------------------------------------------------------===//
-// Printing helper.
-//===----------------------------------------------------------------------===//
+/* ========================================================================== */
+/* Printing helper.                                                           */
+/* ========================================================================== */
 
 namespace mlir {
 namespace detail {
@@ -29,25 +26,23 @@ namespace detail {
 /// user-supplied callback together with opaque user-supplied data.
 class CallbackOstream : public llvm::raw_ostream {
 public:
-  CallbackOstream(std::function<void(MlirStringRef, void *)> callback,
+  CallbackOstream(std::function<void(const char *, intptr_t, void *)> callback,
                   void *opaqueData)
-      : raw_ostream(/*unbuffered=*/true), callback(std::move(callback)),
-        opaqueData(opaqueData), pos(0u) {}
+      : callback(callback), opaqueData(opaqueData), pos(0u) {}
 
   void write_impl(const char *ptr, size_t size) override {
-    MlirStringRef string = mlirStringRefCreate(ptr, size);
-    callback(string, opaqueData);
+    callback(ptr, size, opaqueData);
     pos += size;
   }
 
   uint64_t current_pos() const override { return pos; }
 
 private:
-  std::function<void(MlirStringRef, void *)> callback;
+  std::function<void(const char *, intptr_t, void *)> callback;
   void *opaqueData;
   uint64_t pos;
 };
-} // namespace detail
-} // namespace mlir
+} // end namespace detail
+} // end namespace mlir
 
 #endif // MLIR_CAPI_UTILS_H
