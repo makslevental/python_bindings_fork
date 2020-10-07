@@ -19,6 +19,7 @@ void mlirDiagnosticPrint(MlirDiagnostic diagnostic, MlirStringCallback callback,
                          void *userData) {
   detail::CallbackOstream stream(callback, userData);
   unwrap(diagnostic).print(stream);
+  stream.flush();
 }
 
 MlirLocation mlirDiagnosticGetLocation(MlirDiagnostic diagnostic) {
@@ -51,20 +52,14 @@ MlirDiagnostic mlirDiagnosticGetNote(MlirDiagnostic diagnostic, intptr_t pos) {
   return wrap(*std::next(unwrap(diagnostic).getNotes().begin(), pos));
 }
 
-static void deleteUserDataNoop(void *userData) {}
-
-MlirDiagnosticHandlerID mlirContextAttachDiagnosticHandler(
-    MlirContext context, MlirDiagnosticHandler handler, void *userData,
-    void (*deleteUserData)(void *)) {
+MlirDiagnosticHandlerID
+mlirContextAttachDiagnosticHandler(MlirContext context,
+                                   MlirDiagnosticHandler handler) {
   assert(handler && "unexpected null diagnostic handler");
-  if (deleteUserData == nullptr)
-    deleteUserData = deleteUserDataNoop;
   DiagnosticEngine::HandlerID id =
       unwrap(context)->getDiagEngine().registerHandler(
-          [handler,
-           ownedUserData = std::unique_ptr<void, decltype(deleteUserData)>(
-               userData, deleteUserData)](Diagnostic &diagnostic) {
-            return unwrap(handler(wrap(diagnostic), ownedUserData.get()));
+          [handler](Diagnostic &diagnostic) {
+            return unwrap(handler(wrap(diagnostic)));
           });
   return static_cast<MlirDiagnosticHandlerID>(id);
 }
