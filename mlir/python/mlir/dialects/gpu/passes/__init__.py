@@ -2,4 +2,5 @@
 #  See https://llvm.org/LICENSE.txt for license information.
 #  SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-from ...._mlir_libs import _mlirGPUPasses as _cextGPUPasses
+from ...._cext_loader import _load_extension
+_cextGPUPasses = _load_extension("_mlirGPUPasses")
