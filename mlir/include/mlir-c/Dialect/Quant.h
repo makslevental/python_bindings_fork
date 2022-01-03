@@ -1,4 +1,4 @@
-//===-- mlir-c/Dialect/Quant.h - C API for LLVM -------------------*- C -*-===//
+//===-- mlir-c/Dialect/LLVM.h - C API for LLVM --------------------*- C -*-===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM
 // Exceptions.
@@ -11,6 +11,7 @@
 #define MLIR_C_DIALECT_QUANT_H
 
 #include "mlir-c/IR.h"
+#include "mlir-c/Registration.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,7 +27,7 @@ MLIR_DECLARE_CAPI_DIALECT_REGISTRATION(quant, quant);
 MLIR_CAPI_EXPORTED bool mlirTypeIsAQuantizedType(MlirType type);
 
 /// Returns the bit flag used to indicate signedness of a quantized type.
-MLIR_CAPI_EXPORTED unsigned mlirQuantizedTypeGetSignedFlag(void);
+MLIR_CAPI_EXPORTED unsigned mlirQuantizedTypeGetSignedFlag();
 
 /// Returns the minimum possible value stored by a quantized type.
 MLIR_CAPI_EXPORTED int64_t mlirQuantizedTypeGetDefaultMinimumForInteger(
@@ -171,47 +172,6 @@ mlirUniformQuantizedPerAxisTypeGetQuantizedDimension(MlirType type);
 /// Returns `true` if the given uniform quantized per-axis type is fixed-point.
 MLIR_CAPI_EXPORTED bool
 mlirUniformQuantizedPerAxisTypeIsFixedPoint(MlirType type);
-
-//===---------------------------------------------------------------------===//
-// UniformQuantizedSubChannelType
-//===---------------------------------------------------------------------===//
-
-/// Returns `true` if the given type is a UniformQuantizedSubChannel.
-MLIR_CAPI_EXPORTED bool
-mlirTypeIsAUniformQuantizedSubChannelType(MlirType type);
-
-/// Creates a UniformQuantizedSubChannelType with the given parameters.
-///
-/// The type is owned by the context. `scalesAttr` and `zeroPointsAttr` must be
-/// DenseElementsAttrs.  `quantizedDimensions` and `blockSizes`
-/// point to `blockSizeInfoLength` number of elements, describing respectively
-/// the quantization axis and corresponding block size.
-MLIR_CAPI_EXPORTED MlirType mlirUniformQuantizedSubChannelTypeGet(
-    unsigned flags, MlirType storageType, MlirType expressedType,
-    MlirAttribute scalesAttr, MlirAttribute zeroPointsAttr,
-    intptr_t blockSizeInfoLength, int32_t *quantizedDimensions,
-    int64_t *blockSizes, int64_t storageTypeMin, int64_t storageTypeMax);
-
-/// Returns the number of block sizes provided in type.
-MLIR_CAPI_EXPORTED intptr_t
-mlirUniformQuantizedSubChannelTypeGetNumBlockSizes(MlirType type);
-
-/// Returns the quantized dimension at the given position.
-MLIR_CAPI_EXPORTED int32_t
-mlirUniformQuantizedSubChannelTypeGetQuantizedDimension(MlirType type,
-                                                        intptr_t pos);
-
-/// Returns the block size at the given position.
-MLIR_CAPI_EXPORTED int64_t
-mlirUniformQuantizedSubChannelTypeGetBlockSize(MlirType type, intptr_t pos);
-
-/// Returns the scales of the quantized type.
-MLIR_CAPI_EXPORTED MlirAttribute
-mlirUniformQuantizedSubChannelTypeGetScales(MlirType type);
-
-/// Returns the zero-points of the quantized type.
-MLIR_CAPI_EXPORTED MlirAttribute
-mlirUniformQuantizedSubChannelTypeGetZeroPoints(MlirType type);
 
 //===---------------------------------------------------------------------===//
 // CalibratedQuantizedType
