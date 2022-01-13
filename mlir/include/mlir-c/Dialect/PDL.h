@@ -11,6 +11,7 @@
 #define MLIR_C_DIALECT_PDL_H
 
 #include "mlir-c/IR.h"
+#include "mlir-c/Registration.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,8 +49,6 @@ MLIR_CAPI_EXPORTED bool mlirTypeIsAPDLRangeType(MlirType type);
 
 MLIR_CAPI_EXPORTED MlirType mlirPDLRangeTypeGet(MlirType elementType);
 
-MLIR_CAPI_EXPORTED MlirType mlirPDLRangeTypeGetElementType(MlirType type);
-
 //===---------------------------------------------------------------------===//
 // TypeType
 //===---------------------------------------------------------------------===//
@@ -70,4 +69,4 @@ MLIR_CAPI_EXPORTED MlirType mlirPDLValueTypeGet(MlirContext ctx);
 }
 #endif
 
-#endif // MLIR_C_DIALECT_PDL_H
+#endif // MLIR_C_DIALECT_QUANT_H
