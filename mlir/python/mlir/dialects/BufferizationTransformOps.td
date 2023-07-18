@@ -15,6 +15,7 @@
 #ifndef PYTHON_BINDINGS_BUFFERIZATION_TRANSFORM_OPS
 #define PYTHON_BINDINGS_BUFFERIZATION_TRANSFORM_OPS
 
+include "mlir/Bindings/Python/Attributes.td"
 include "mlir/Dialect/Bufferization/TransformOps/BufferizationTransformOps.td"
 
 #endif // PYTHON_BINDINGS_BUFFERIZATION_TRANSFORM_OPS
