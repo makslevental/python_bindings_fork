@@ -15,8 +15,7 @@
 #include "mlir/CAPI/IR.h"
 #include "mlir/CAPI/Support.h"
 #include "mlir/CAPI/Wrap.h"
-#include "mlir/Dialect/Transform/IR/Utils.h"
-#include "mlir/Dialect/Transform/Interfaces/TransformInterfaces.h"
+#include "mlir/Dialect/Transform/IR/TransformInterfaces.h"
 #include "mlir/Dialect/Transform/Transforms/TransformInterpreterUtils.h"
 
 using namespace mlir;
@@ -71,13 +70,5 @@ MlirLogicalResult mlirTransformApplyNamedSequence(
   return wrap(transform::applyTransformNamedSequence(
       unwrap(payload), unwrap(transformRoot),
       cast<ModuleOp>(unwrap(transformModule)), *unwrap(transformOptions)));
-}
-
-MlirLogicalResult mlirMergeSymbolsIntoFromClone(MlirOperation target,
-                                                MlirOperation other) {
-  OwningOpRef<Operation *> otherOwning(unwrap(other)->clone());
-  LogicalResult result = transform::detail::mergeSymbolsInto(
-      unwrap(target), std::move(otherOwning));
-  return wrap(result);
 }
 }
