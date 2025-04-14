@@ -21,13 +21,9 @@ extern "C" {
 
 /// Emits SMTLIB for the specified module using the provided callback and user
 /// data
-MLIR_CAPI_EXPORTED MlirLogicalResult
-mlirTranslateModuleToSMTLIB(MlirModule, MlirStringCallback, void *userData,
-                            bool inlineSingleUseValues, bool indentLetBody);
-
-MLIR_CAPI_EXPORTED MlirLogicalResult mlirTranslateOperationToSMTLIB(
-    MlirOperation, MlirStringCallback, void *userData,
-    bool inlineSingleUseValues, bool indentLetBody);
+MLIR_CAPI_EXPORTED MlirLogicalResult mlirExportSMTLIB(MlirModule,
+                                                      MlirStringCallback,
+                                                      void *userData);
 
 #ifdef __cplusplus
 }
