@@ -1,0 +1,118 @@
+#  Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+#  See https://llvm.org/LICENSE.txt for license information.
+#  SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+#  Copyright (c) 2024.
+
+name: Auto Integrate LLVM
+on:
+  workflow_dispatch:
+  schedule:
+    # At minute 0 past hour 1. (see https://crontab.guru)
+    - cron: '00 01 * * *'
+
+concurrency:
+  # A PR number if a pull request and otherwise the commit hash. This cancels
+  # queued and in-progress runs for the same PR (presubmit) or commit
+  # (postsubmit). The workflow name is prepended to avoid conflicts between
+  # different workflows.
+  group: ${{ github.workflow }}-${{ github.event.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  update-dep:
+
+    name: "Integrate LLVM and send PR"
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: "Check out repository"
+        uses: actions/checkout@v4.2.2
+
+      - name: Restore LLVM project cache
+        id: llvm-project-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: /tmp/llvm-project
+          key: cache-llvm-project
+
+      - name: "Get llvm-project"
+        shell: bash
+        id: get-llvm-project
+        run: |
+          
+          echo "cache-hit '${{ steps.llvm-project-restore.outputs.cache-hit }}'"
+          # https://github.com/actions/cache/issues/1566
+          if [ "${{ steps.llvm-project-restore.outputs.cache-hit }}" == "" ]; then
+            git clone https://github.com/llvm/llvm-project.git /tmp/llvm-project
+          fi
+          
+          pushd /tmp/llvm-project
+          git pull origin main
+          echo "LLVM_SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          popd
+
+      - name: Save LLVM project cache
+        id: llvm-project-save
+        uses: actions/cache/save@v4
+        with:
+          path: /tmp/llvm-project
+          key: cache-llvm-project
+
+      - name: "Make filtered llvm-project"
+        shell: bash
+        run: |
+          
+          sudo apt install git-filter-repo
+          HERE=$(pwd)
+          pushd /tmp/llvm-project
+          cp $HERE/emreg.py .
+          bash $HERE/filter-llvm.sh
+          popd
+
+      - name: "Rebase on top of llvm-project"
+        shell: bash
+        id: rebase-llvm-project
+        run: |
+          
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git pull /tmp/llvm-project main --rebase
+
+      - name: Generate token
+        uses: actions/create-github-app-token@v1
+        id: generate-token
+        with:
+          app-id: ${{ secrets.BUMP_LLVM_CREATE_PR_APP_ID }}
+          private-key: ${{ secrets.BUMP_LLVM_CREATE_PR_APP_PRIVATE_KEY }}
+
+      - name: "Create Pull Request"
+        id: cpr
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ steps.generate-token.outputs.token }}
+          commit-message: "[LLVM] Integrate to ${{ steps.get-llvm-project.outputs.LLVM_SHA_SHORT }}"
+          title: "[LLVM] Integrate to ${{ steps.get-llvm-project.outputs.LLVM_SHA_SHORT }}"
+          body: "Integrate LLVM to https://github.com/llvm/llvm-project/commit/${{ steps.get-llvm-project.outputs.LLVM_SHA_SHORT }}"
+          author: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
+          base: main
+          branch: update-llvm
+          delete-branch: true
+
+      - name: Enable auto-merge
+        if: steps.cpr.outputs.pull-request-operation == 'created'
+        uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          token: ${{ steps.generate-token.outputs.token }}
+          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+          merge-method: rebase
+
+      - name: Auto approve
+        if: steps.cpr.outputs.pull-request-operation == 'created'
+        run: gh pr review --approve "${{ steps.cpr.outputs.pull-request-number }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
