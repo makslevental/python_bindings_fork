@@ -33,7 +33,7 @@ jobs:
       - name: "Check out repository"
         uses: actions/checkout@v4.2.2
         with:
-          fetch-depth: 2
+          fetch-depth: 0
 
       - name: Restore LLVM project cache
         id: llvm-project-restore
