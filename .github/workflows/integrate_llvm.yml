@@ -83,7 +83,7 @@ jobs:
           
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
-          git pull /tmp/llvm-project main --rebase
+          git pull /tmp/llvm-project main --no-rebase
 
       - name: Generate token
         uses: actions/create-github-app-token@v1
@@ -111,7 +111,7 @@ jobs:
         with:
           token: ${{ steps.generate-token.outputs.token }}
           pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
-          merge-method: merge
+          merge-method: rebase
 
       - name: Auto approve
         if: steps.cpr.outputs.pull-request-operation == 'created'
