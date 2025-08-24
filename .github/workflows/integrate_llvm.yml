@@ -111,7 +111,7 @@ jobs:
         with:
           token: ${{ steps.generate-token.outputs.token }}
           pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
-          merge-method: rebase
+          merge-method: merge
 
       - name: Auto approve
         if: steps.cpr.outputs.pull-request-operation == 'created'
